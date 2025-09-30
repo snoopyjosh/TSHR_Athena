@@ -1,4 +1,4 @@
-const CACHE = 'TSHR_Athenap-v1';
+const CACHE = 'TSHR_Athena-v1';
 const ASSETS = [
   './',
   './index.html',
