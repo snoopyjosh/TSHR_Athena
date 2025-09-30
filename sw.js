@@ -1,4 +1,4 @@
-const CACHE = 'athena-qa-v1';
+const CACHE = 'athena-doublemap-v1';
 const ASSETS = [
   './',
   './index.html',
