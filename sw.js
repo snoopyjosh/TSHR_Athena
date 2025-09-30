@@ -1,12 +1,12 @@
-const CACHE = 'athena-doublemap-v1';
+const CACHE = 'TSHR_Athenap-v1';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
   './data.js',
   './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png'
+  './icon-at-192.png',
+  './icon-at-512.png'
 ];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
