@@ -3,76 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Athena QA 密碼產生器</title>
+  <title>Athena QA 雙層映射版</title>
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <style>
     :root { color-scheme: light dark; }
     body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans, "PingFang TC", "Microsoft JhengHei", sans-serif;
-           margin:0; padding:24px; background:#0b1220; color:#e5e7eb; }
-    .card { max-width:860px; margin:auto; background:#111827; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.3); }
-    h1 { font-size:22px; margin:0 0 6px; }
-    p.sub { margin:0 0 12px; color:#9ca3af; }
-    .row { display:grid; grid-template-columns: 1fr 1fr auto; gap:12px; }
-    input[type=number] { width:100%; padding:12px 14px; border-radius:12px; border:1px solid #374151; background:#0f172a; color:#e5e7eb; font-size:18px; }
-    .btn { padding:12px 16px; border-radius:12px; border:1px solid #374151; background:#1f2937; color:#e5e7eb; cursor:pointer; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:16px; }
-    .k { background:#0f172a; padding:2px 6px; border-radius:8px; border:1px solid #374151; }
-    .box { background:#0f172a; border:1px solid #374151; border-radius:12px; padding:12px; }
-    .lbl { color:#94a3b8; font-size:12px; }
-    .ans { font-size:22px; margin-top:4px; }
-    footer { margin-top:16px; text-align:center; color:#94a3b8; font-size:12px; }
-    table { width:100%; border-collapse:collapse; }
-    th,td { padding:8px 8px; border-bottom:1px solid #1f2937; text-align:left; font-variant-numeric: tabular-nums; }
-    th { position:sticky; top:0; background:#0f172a; }
-    .tbl { margin-top:16px; max-height:320px; overflow:auto; border:1px solid #374151; border-radius:12px; }
+           margin: 0; padding: 24px; background: #0b1220; color: #e5e7eb; }
+    .card { max-width: 760px; margin: auto; background: #111827; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    p.sub { margin: 0 0 12px; color: #9ca3af; }
+    input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #374151; background: #0f172a; color: #e5e7eb; font-size: 18px; outline: none; letter-spacing: 1px; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 16px;}
+    .btn { padding: 12px 16px; border-radius: 12px; border: 1px solid #374151; background: #1f2937; color: #e5e7eb; cursor: pointer; }
+    .out { margin-top: 18px; font-size: 20px; }
+    .ok { color: #34d399; }
+    .bad { color: #f87171; }
+    .hint { margin-top: 8px; color: #9ca3af; font-size: 14px;}
+    .tbl { margin-top: 18px; max-height: 340px; overflow: auto; border: 1px solid #374151; border-radius: 12px;}
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #1f2937; text-align: left; font-variant-numeric: tabular-nums; }
+    th { position: sticky; top: 0; background: #0f172a; }
+    footer { margin-top: 16px; text-align: center; color: #94a3b8; font-size: 12px; }
+    .pill { background:#0f766e; padding:4px 8px; border-radius:999px; font-size:12px; margin-left:8px;}
+    code.k { background:#0f172a; padding:2px 6px; border-radius:8px; border:1px solid #374151;}
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Athena Service Login 密碼產生器</h1>
-    <p class="sub">輸入兩個 <span class="k">Question</span> 編號（0–50）。系統會查表得到各自的 <span class="k">Answer</span>，並提供各種組合格式。</p>
+    <h1>Athena QA 雙層映射 <span class="pill">PWA</span></h1>
+    <p class="sub">輸入 <b>4 位數字</b>，代表兩個 Question 編號拼起來（<code class="k">HI</code>=前兩位、<code class="k">LO</code>=後兩位，各允許 00–50）。輸出 = <code class="k">MAP[HI] + MAP[LO]</code>。</p>
+
     <div class="row">
-      <input type="number" id="q1" min="0" max="50" placeholder="Question #1 (0-50)">
-      <input type="number" id="q2" min="0" max="50" placeholder="Question #2 (0-50)">
+      <input id="in" maxlength="4" placeholder="輸入 4 位數… 例如 0106 / 2331" autocomplete="off" inputmode="numeric">
       <button class="btn" id="clr">清除</button>
     </div>
 
-    <div class="grid">
-      <div class="box">
-        <div class="lbl">Answer #1</div>
-        <div id="a1" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">Answer #2</div>
-        <div id="a2" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">字串連接（A1 | A2）</div>
-        <div id="cat12" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">字串連接（A2 | A1）</div>
-        <div id="cat21" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">各補零至 2 位再連接（>99 仍保留 3 位）</div>
-        <div id="pad2" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">各補零至 3 位再連接</div>
-        <div id="pad3" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">加總（A1 + A2）</div>
-        <div id="sum" class="ans">—</div>
-      </div>
-      <div class="box">
-        <div class="lbl">差值（|A1 - A2|）</div>
-        <div id="diff" class="ans">—</div>
-      </div>
-    </div>
+    <div id="out" class="out">—</div>
+    <div class="hint">僅允許 0–9；自動截取 4 位。若 HI 或 LO 超出 00–50，會提示錯誤。</div>
 
     <div class="tbl">
       <table id="table">
@@ -81,8 +50,9 @@
       </table>
     </div>
 
-    <footer>© 2025 Athena QA • 可離線使用 • 可加入主畫面安裝</footer>
+    <footer>© 2025 Athena QA • 可加入主畫面安裝 • 離線可用</footer>
   </div>
+
   <script src="data.js"></script>
   <script src="app.js" type="module"></script>
 </body>
