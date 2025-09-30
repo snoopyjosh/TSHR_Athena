@@ -3,54 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>TSHR Athena</title>
+  <title>TSHR Athena（4位；雙層映射）</title>
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0f172a">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root { color-scheme: light dark; }
     body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans, "PingFang TC", "Microsoft JhengHei", sans-serif;
            margin: 0; padding: 24px; background: #0b1220; color: #e5e7eb; }
-    .card { max-width: 760px; margin: auto; background: #111827; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+    .card { max-width: 720px; margin: auto; background: #111827; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
     h1 { font-size: 20px; margin: 0 0 12px; }
     p.sub { margin: 0 0 12px; color: #9ca3af; }
-    input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #374151; background: #0f172a; color: #e5e7eb; font-size: 18px; outline: none; letter-spacing: 1px; }
+    .note { font-size: 13px; color:#a3a3a3; margin-bottom: 10px; }
+    input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #374151; background: #0f172a; color: #e5e7eb; font-size: 18px; outline: none; letter-spacing: 1px;}
     .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 16px;}
     .btn { padding: 12px 16px; border-radius: 12px; border: 1px solid #374151; background: #1f2937; color: #e5e7eb; cursor: pointer; }
-    .out { margin-top: 18px; font-size: 20px; }
+    .out { margin-top: 18px; font-size: 18px; }
+    .hint { margin-top: 8px; color: #9ca3af; font-size: 14px;}
+    .tbl { margin-top: 18px; max-height: 320px; overflow: auto; border: 1px solid #374151; border-radius: 12px;}
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #1f2937; text-align: left; }
+    th { position: sticky; top: 0; background: #0f172a; }
     .ok { color: #34d399; }
     .bad { color: #f87171; }
-    .hint { margin-top: 8px; color: #9ca3af; font-size: 14px;}
-    .tbl { margin-top: 18px; max-height: 340px; overflow: auto; border: 1px solid #374151; border-radius: 12px;}
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid #1f2937; text-align: left; font-variant-numeric: tabular-nums; }
-    th { position: sticky; top: 0; background: #0f172a; }
-    footer { margin-top: 16px; text-align: center; color: #94a3b8; font-size: 12px; }
+    footer { margin-top: 20px; text-align: center; color: #94a3b8; font-size: 12px; }
     .pill { background:#0f766e; padding:4px 8px; border-radius:999px; font-size:12px; margin-left:8px;}
     code.k { background:#0f172a; padding:2px 6px; border-radius:8px; border:1px solid #374151;}
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>TSHR Athen<span class="pill">PWA</span></h1>
-    <p class="sub">輸入 <b>4 位數字</b>，代表兩個 Question 編號拼起來（<code class="k">HI</code>=前兩位、<code class="k">LO</code>=後兩位，各允許 00–50）。輸出 = <code class="k">MAP[HI] + MAP[LO]</code>。</p>
+    <h1>TSHR Athena 查詢 <span class="pill">4位 PWA（雙層映射）</span></h1>
+    <p class="sub">規則：輸入 <code class="k">HI+LO</code>（4碼）。<br>輸出 = <code class="k">MAP[HI] + MAP[LO]</code>（前兩碼與後兩碼都各自查表）。</p>
+    <p class="note">例：輸入 <code class="k">230A</code> → <code class="k">MAP[23]=5D</code>、<code class="k">MAP[0A]=3E</code> → 輸出 <code class="k">5D3E</code>。</p>
 
     <div class="row">
-      <input id="in" maxlength="4" placeholder="輸入 4 位數… 例如 0106 / 2331" autocomplete="off" inputmode="numeric">
+      <input id="in" maxlength="4" placeholder="輸入 4 位十六進位… 例如 0606 / 230A" autocomplete="off" autocapitalize="characters" inputmode="latin">
       <button class="btn" id="clr">清除</button>
     </div>
 
     <div id="out" class="out">—</div>
-    <div class="hint">僅允許 0–9；自動截取 4 位。若 HI 或 LO 超出 00–50，會提示錯誤。</div>
+    <div class="hint">提示：僅允許 0-9 / A-F；自動轉大寫。輸入長度需為 4 才會計算。</div>
 
     <div class="tbl">
       <table id="table">
-        <thead><tr><th>Question</th><th>Answer</th><th>Question</th><th>Answer</th></tr></thead>
+        <thead><tr><th>原始表（鍵）</th><th>對應（值）</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <footer>© 2025 Athena • 可加入主畫面安裝 • 離線可用</footer>
+    <footer>© 2025 Challenge Lookup • 可加入主畫面安裝 • 離線可用</footer>
   </div>
 
   <script src="data.js"></script>
