@@ -1,4 +1,4 @@
-import qa from './data.js';
+import mapping from './data.js';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -6,62 +6,53 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const $q1 = document.getElementById('q1');
-const $q2 = document.getElementById('q2');
-const $a1 = document.getElementById('a1');
-const $a2 = document.getElementById('a2');
-const $cat12 = document.getElementById('cat12');
-const $cat21 = document.getElementById('cat21');
-const $pad2 = document.getElementById('pad2');
-const $pad3 = document.getElementById('pad3');
-const $sum = document.getElementById('sum');
-const $diff = document.getElementById('diff');
+const $in = document.getElementById('in');
+const $out = document.getElementById('out');
 const $clr = document.getElementById('clr');
+const $tbody = document.querySelector('#table tbody');
 
-function padN(n, width) {
-  const s = String(n);
-  if (s.length >= width) return s;
-  return '0'.repeat(width - s.length) + s;
+function num4(str) {
+  return (str || '').replace(/\D/g, '').slice(0,4);
 }
 
-function lookup() {
-  const q1 = parseInt($q1.value, 10);
-  const q2 = parseInt($q2.value, 10);
-  const v1 = Number.isInteger(q1) ? qa[q1] : undefined;
-  const v2 = Number.isInteger(q2) ? qa[q2] : undefined;
-
-  $a1.textContent = v1 !== undefined ? v1 : '—';
-  $a2.textContent = v2 !== undefined ? v2 : '—';
-
-  if (v1 !== undefined && v2 !== undefined) {
-    $cat12.textContent = String(v1) + String(v2);
-    $cat21.textContent = String(v2) + String(v1);
-    $pad2.textContent  = padN(v1, 2) + padN(v2, 2);
-    $pad3.textContent  = padN(v1, 3) + padN(v2, 3);
-    $sum.textContent   = v1 + v2;
-    $diff.textContent  = Math.abs(v1 - v2);
-  } else {
-    $cat12.textContent = $cat21.textContent = $pad2.textContent = $pad3.textContent = $sum.textContent = $diff.textContent = '—';
+function lookup4(key) {
+  if (!key || key.length !== 4) {
+    $out.innerHTML = '—';
+    return;
   }
+  const hi = key.slice(0,2);
+  const lo = key.slice(2,4);
+  const valid = Object.prototype.hasOwnProperty.call(mapping, hi) && Object.prototype.hasOwnProperty.call(mapping, lo);
+  if (!valid) {
+    const errs = [];
+    if (!Object.prototype.hasOwnProperty.call(mapping, hi)) errs.push(`HI=${hi}`);
+    if (!Object.prototype.hasOwnProperty.call(mapping, lo)) errs.push(`LO=${lo}`);
+    $out.innerHTML = `<span class="bad">超出範圍或無對應（${errs.join(', ')}；允許 00–50）</span>`;
+    return;
+  }
+  const mappedHi = String(mapping[hi]);
+  const mappedLo = String(mapping[lo]);
+  $out.innerHTML = `<span class="ok">Answer: ${mappedHi}${mappedLo}</span>`;
 }
 
-$q1.addEventListener('input', lookup);
-$q2.addEventListener('input', lookup);
-$clr.addEventListener('click', () => {
-  $q1.value = ''; $q2.value = '';
-  lookup();
+$in.addEventListener('input', () => {
+  $in.value = num4($in.value);
+  lookup4($in.value);
 });
 
-// render table in two columns
-const $tbody = document.querySelector('#table tbody');
-const keys = Object.keys(qa).map(Number).sort((a,b)=>a-b);
+$clr.addEventListener('click', () => {
+  $in.value = '';
+  $in.focus();
+  lookup4('');
+});
+
+// Render table in two columns
+const keys = Object.keys(mapping).map(k=>parseInt(k,10)).sort((a,b)=>a-b);
 for (let i = 0; i < keys.length; i += 2) {
   const k1 = keys[i];
   const k2 = keys[i+1];
-  const a1 = qa[k1];
-  const a2 = k2 !== undefined ? qa[k2] : '';
-  const a2v = k2 !== undefined ? qa[k2] : '';
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${k1}</td><td>${a1}</td><td>${k2 !== undefined ? k2 : ''}</td><td>${k2 !== undefined ? a2v : ''}</td>`;
+  tr.innerHTML = `<td>${k1.toString().padStart(2,'0')}</td><td>${mapping[k1.toString().padStart(2,'0')]}</td>` +
+                 `<td>${k2!==undefined?k2.toString().padStart(2,'0'):''}</td><td>${k2!==undefined?mapping[k2.toString().padStart(2,'0')]:''}</td>`;
   $tbody.appendChild(tr);
 }
